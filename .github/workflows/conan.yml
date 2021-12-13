@@ -12,11 +12,15 @@ jobs:
     steps:
     - name: Set git to use LF
       run: |
-        git config --local core.autocrlf false
-        git config --local core.eol lf
+        git config --global core.autocrlf false
+        git config --global core.eol lf
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
+    - name: Revert to default CRLF
+      run: |
+        git config --global core.autocrlf true
+        git config --global --unset core.eol
     - name: Install dependencies
       run: pip install conan
     - name: Config
