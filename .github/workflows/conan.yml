@@ -37,7 +37,6 @@ jobs:
       run: conan upload "dxc" -r triada --all -c
 
   linux:
-    if: false # disable
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -55,13 +54,12 @@ jobs:
         conan user -r triada -p --skip-auth
     - name: Build
       run: |
-        conan create . --profile profiles/linux.profile -s build_type=Release
+        conan create . -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada --all -c
 
   macos:
     runs-on: macos-11
-    if: false # disable
     steps:
     - uses: actions/checkout@v2
       with:
@@ -77,6 +75,6 @@ jobs:
         conan user -r triada -p --skip-auth
     - name: Build
       run: |
-        conan create . --profile profiles/macos.profile -s build_type=Release
+        conan create . -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada --all -c
