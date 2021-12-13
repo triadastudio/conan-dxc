@@ -8,6 +8,7 @@ on:
 
 jobs:
   windows:
+    if: false # disable
     runs-on: windows-latest
     steps:
     - name: Set git to use LF
@@ -33,6 +34,7 @@ jobs:
       run: conan upload "dxc" -r triada --all -c
 
   linux:
+    if: false # disable
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
