@@ -15,6 +15,10 @@ class DXCConan(ConanFile):
     no_copy_source = True
 
     @property
+    def _source_commit_or_tag(self):
+        return "v1.6.2112"
+
+    @property
     def _source_subfolder(self):
         return "source_subfolder"
 
@@ -32,7 +36,7 @@ class DXCConan(ConanFile):
     def source(self):
         git = tools.Git(folder=self._source_subfolder)
         git.clone("https://github.com/microsoft/DirectXShaderCompiler.git",
-                  "v1.6.2112", shallow=True)
+                  self._source_commit_or_tag, shallow=True)
         git.checkout_submodules("recursive")
 
     def configure(self):
