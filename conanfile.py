@@ -40,9 +40,9 @@ class DXCConan(ConanFile):
             del self.options.fPIC
 
     def build_windows(self):
-        win_sdk_ver = "10.0.19041.0"
+        win_sdk_ver = "10.0.20348.0"
         self.run("call utils/hct/hctstart.cmd . %s && "
-                 "call utils/hct/hctbuild.cmd -x64 -Release -dxc-cmake-system-version %s -spirv -show-cmake-log"
+                 "call utils/hct/hctbuild.cmd -x64 -Release -dxc-cmake-system-version %s -show-cmake-log -spirv"
                  % (self.build_folder, win_sdk_ver), cwd=self._source_dir)
 
     @property

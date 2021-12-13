@@ -8,7 +8,6 @@ on:
 
 jobs:
   windows:
-    if: false # disable
     runs-on: windows-latest
     steps:
     - name: Set git to use LF
@@ -29,7 +28,7 @@ jobs:
         conan user -r triada -p --skip-auth
     - name: Build
       run: |
-        conan create . -b missing --profile profiles/windows.profile -s build_type=Release
+        conan create . -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada --all -c
 
@@ -52,12 +51,13 @@ jobs:
         conan user -r triada -p --skip-auth
     - name: Build
       run: |
-        conan create . -b missing --profile profiles/linux.profile -s build_type=Release
+        conan create . --profile profiles/linux.profile -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada --all -c
 
   macos:
     runs-on: macos-11
+    if: false # disable
     steps:
     - uses: actions/checkout@v2
       with:
@@ -73,6 +73,6 @@ jobs:
         conan user -r triada -p --skip-auth
     - name: Build
       run: |
-        conan create . -b missing --profile profiles/macos.profile -s build_type=Release
+        conan create . --profile profiles/macos.profile -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada --all -c
