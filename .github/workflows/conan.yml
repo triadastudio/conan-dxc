@@ -1,0 +1,76 @@
+name: conan-dxc CI
+
+on:
+  push:
+    branches: [ ci-test ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+    - name: Set git to use LF
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Install dependencies
+      run: pip install conan
+    - name: Config
+      env:
+        CONAN_LOGIN_USERNAME: ${{ secrets.JFROG_USER }}
+        CONAN_PASSWORD: ${{ secrets.JFROG_APIKEY }}
+      run: |
+        conan remote add triada https://triada.jfrog.io/artifactory/api/conan/conan
+        conan user -r triada -p --skip-auth
+    - name: Build
+      run: |
+        conan create . -b missing --profile profiles/windows.profile -s build_type=Release
+    - name: Upload
+      run: conan upload "dxc" -r triada --all -c
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Install dependencies
+      run: |
+        sudo pip install conan
+    - name: Config
+      env:
+        CONAN_LOGIN_USERNAME: ${{ secrets.JFROG_USER }}
+        CONAN_PASSWORD: ${{ secrets.JFROG_APIKEY }}
+      run: |
+        conan remote add triada https://triada.jfrog.io/artifactory/api/conan/conan
+        conan user -r triada -p --skip-auth
+    - name: Build
+      run: |
+        conan create . -b missing --profile profiles/linux.profile -s build_type=Release
+    - name: Upload
+      run: conan upload "dxc" -r triada --all -c
+
+  macos:
+    runs-on: macos-11
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    - name: Install dependencies
+      run: pip3 install conan
+    - name: Config
+      env:
+        CONAN_LOGIN_USERNAME: ${{ secrets.JFROG_USER }}
+        CONAN_PASSWORD: ${{ secrets.JFROG_APIKEY }}
+      run: |
+        conan remote add triada https://triada.jfrog.io/artifactory/api/conan/conan
+        conan user -r triada -p --skip-auth
+    - name: Build
+      run: |
+        conan create . -b missing --profile profiles/macos.profile -s build_type=Release
+    - name: Upload
+      run: conan upload "dxc" -r triada --all -c
