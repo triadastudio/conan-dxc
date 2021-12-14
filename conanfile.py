@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+from conans.errors import ConanInvalidConfiguration
 import os
 
 
@@ -30,7 +31,7 @@ class DXCConan(ConanFile):
         self.build_requires("ninja/1.10.2")
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def source(self):
@@ -38,10 +39,6 @@ class DXCConan(ConanFile):
         git.clone("https://github.com/microsoft/DirectXShaderCompiler.git",
                   self._source_commit_or_tag, shallow=True)
         git.checkout_submodules("recursive")
-
-    def configure(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def build_windows(self):
         win_sdk_ver = "10.0.20348.0"
@@ -70,6 +67,8 @@ class DXCConan(ConanFile):
             self.build_linux()
         elif self.settings.os == "Macos":
             self.build_macos()
+        else:
+            raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
 
     def package(self):
         self.copy("*.h", dst="include",
@@ -85,6 +84,8 @@ class DXCConan(ConanFile):
         elif self.settings.os == "Macos":
             self.copy("lib/libdxcompiler.dylib*", dst="lib", keep_path=False)
             self.copy("bin/dxc", dst="bin", keep_path=False)
+        else:
+            raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
 
     def package_info(self):
         self.cpp_info.names["cmake_find_package"] = "dxc"
