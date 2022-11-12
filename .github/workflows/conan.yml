@@ -8,7 +8,7 @@ on:
 
 jobs:
   windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
     - name: Set git to use LF
       run: |
@@ -65,7 +65,7 @@ jobs:
       with:
         submodules: 'recursive'
     - name: Install dependencies
-      run: pip3 install conan
+      run: brew install conan
     - name: Config
       env:
         CONAN_LOGIN_USERNAME: ${{ secrets.JFROG_USER }}
