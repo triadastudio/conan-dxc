@@ -5,7 +5,7 @@ import os
 
 class DXCConan(ConanFile):
     name = "dxc"
-    version = "1.7.2207"
+    version = "1.7.2211"
     description = "DirectX Shader Compiler"
     license = "NCSA"
     topics = ("hlsl", "dxc", "compiler", "shader", "spirv")
@@ -17,7 +17,7 @@ class DXCConan(ConanFile):
 
     @property
     def _source_commit_or_tag(self):
-        return "v1.7.2207"
+        return "f9bc4f598b420ff211e82523580d8481caac8903"
 
     @property
     def _source_subfolder(self):
