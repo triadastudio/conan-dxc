@@ -49,7 +49,7 @@ class DXCConan(ConanFile):
         return os.path.join(self._source_dir, "cmake/caches/PredefinedParams.cmake")
 
     def build_linux(self):
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -C %s" %
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-13 -DCMAKE_CXX_COMPILER=clang++-13 -C %s" %
                  (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja -j 4")
 
