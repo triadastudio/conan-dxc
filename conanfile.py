@@ -26,7 +26,7 @@ class DXCConan(ConanFile):
 
     @property
     def _build_type(self):
-        return "release"
+        return "Release"
 
     @property
     def _source_dir(self):
@@ -85,10 +85,10 @@ class DXCConan(ConanFile):
             self.package_copy("Release/bin/dxc.exe", "bin")
         elif self.settings.os == "Linux":
             self.package_copy("lib/libdxcompiler.so*", "lib")
-            self.package_copy("bin/dxc", "bin")
+            self.package_copy("bin/dxc*", "bin")
         elif self.settings.os == "Macos":
             self.package_copy("lib/libdxcompiler.dylib*", "lib")
-            self.package_copy("bin/dxc", "bin")
+            self.package_copy("bin/dxc*", "bin")
         else:
             raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
 
