@@ -14,7 +14,7 @@ jobs:
       run: |
         git config --global core.autocrlf false
         git config --global core.eol lf
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
     - name: Revert to default CRLF
@@ -38,7 +38,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
     - name: Install dependencies
@@ -60,7 +60,7 @@ jobs:
   macos:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
     - name: Install dependencies
@@ -76,5 +76,27 @@ jobs:
     - name: Build
       run: |
         conan create . -pr:h profiles/macos.profile -pr:b profiles/macos.profile -b missing -s build_type=Release
+    - name: Upload
+      run: conan upload "dxc" -r triada -c
+
+  macos-armv8:
+    runs-on: macos-14
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: Install dependencies
+      run: |
+        brew install conan
+        brew install ninja
+    - name: Config
+      env:
+        CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
+      run: |
+        conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
+        conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
+    - name: Build
+      run: |
+        conan create . -pr:h profiles/macos-armv8.profile -pr:b profiles/macos-armv8.profile -b missing -s build_type=Release
     - name: Upload
       run: conan upload "dxc" -r triada -c
