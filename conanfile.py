@@ -33,9 +33,10 @@ class DXCConan(ConanFile):
         return os.path.join(self.source_folder, self._source_subfolder)
 
     def source(self):
-        git = scm.Git(self)
-        clone_args = ['--depth', '1', '--recursive', '--branch', self._source_commit_or_tag]
-        git.clone("https://github.com/microsoft/DirectXShaderCompiler.git", self._source_subfolder, args=clone_args )
+        self.run(f"git clone https://github.com/microsoft/DirectXShaderCompiler.git {self._source_subfolder}")
+        with files.chdir(self, self._source_subfolder):
+            self.run(f"git checkout {self._source_commit_or_tag}")
+            self.run("git submodule update --init --recursive")
 
     def build_windows(self):
         win_sdk_ver = "10.0.20348.0"
