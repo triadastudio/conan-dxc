@@ -22,7 +22,8 @@ jobs:
         git config --global core.autocrlf true
         git config --global --unset core.eol
     - name: Install dependencies
-      run: pip install conan
+      run: |
+        pip install conan
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
