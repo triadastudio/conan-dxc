@@ -14,7 +14,7 @@ jobs:
       run: |
         git config --global core.autocrlf false
         git config --global core.eol lf
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Revert to default CRLF
@@ -23,81 +23,105 @@ jobs:
         git config --global --unset core.eol
     - name: Install dependencies
       run: |
-        pip install conan
+        python3 -m venv .venv
+        ./.venv/Scripts/activate
+        python3 -m pip install conan
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
       run: |
+        ./.venv/Scripts/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
     - name: Build
       run: |
+        ./.venv/Scripts/activate
         conan create . -pr:h profiles/windows.profile -pr:b profiles/windows.profile -b missing -s build_type=Release
     - name: Upload
-      run: conan upload "dxc" -r triada -c
+      run: |
+        ./.venv/Scripts/activate
+        conan upload "dxc" -r triada -c
 
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Install dependencies
       run: |
-        sudo pip install conan
-        sudo pip install ninja
+        python3 -m venv .venv
+        . .venv/bin/activate
+        python3 -m pip install conan
+        python3 -m pip install ninja
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
       run: |
+        . .venv/bin/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
     - name: Build
       run: |
+        . .venv/bin/activate
         conan create . -pr:h profiles/linux.profile -pr:b profiles/linux.profile -b missing -s build_type=Release
     - name: Upload
-      run: conan upload "dxc" -r triada -c
+      run: |
+        . .venv/bin/activate
+        conan upload "dxc" -r triada -c
 
   macos:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Install dependencies
       run: |
-        brew install conan
-        brew install ninja
+        python3 -m venv .venv
+        . .venv/bin/activate
+        python3 -m pip install conan
+        python3 -m pip install ninja
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
       run: |
+        . .venv/bin/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
     - name: Build
       run: |
+        . .venv/bin/activate
         conan create . -pr:h profiles/macos.profile -pr:b profiles/macos.profile -b missing -s build_type=Release
     - name: Upload
-      run: conan upload "dxc" -r triada -c
+      run: |
+        . .venv/bin/activate
+        conan upload "dxc" -r triada -c
 
   macos-armv8:
     runs-on: macos-14
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
     - name: Install dependencies
       run: |
-        brew install conan
-        brew install ninja
+        python3 -m venv .venv
+        . .venv/bin/activate
+        python3 -m pip install conan
+        python3 -m pip install ninja
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
       run: |
+        . .venv/bin/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
     - name: Build
       run: |
+        . .venv/bin/activate
         conan create . -pr:h profiles/macos-armv8.profile -pr:b profiles/macos-armv8.profile -b missing -s build_type=Release
     - name: Upload
-      run: conan upload "dxc" -r triada -c
+      run: |
+        . .venv/bin/activate
+        conan upload "dxc" -r triada -c
