@@ -54,7 +54,7 @@ class DXCConan(ConanFile):
 
     def build_macos(self):
         if self.settings.arch == "x86_64":
-            self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_SYSTEM_PROCESSOR=x86_64 -C %s" %
+            self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_OSX_ARCHITECTURES=x86_64 -C %s" %
                     (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
         else:
             self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -C %s" %
