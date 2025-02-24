@@ -53,12 +53,9 @@ class DXCConan(ConanFile):
         self.run("ninja -j 4")
 
     def build_macos(self):
-        if self.settings.arch == "x86_64":
-            self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_SYSTEM_PROCESSOR=x86_64 -DCMAKE_OSX_ARCHITECTURES=x86_64 -C %s" %
-                    (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
-        else:
-            self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -C %s" %
-                    (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
+        target_osx_arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_OSX_ARCHITECTURES=%s -C %s" %
+                (self.build_folder, self._build_type, target_osx_arch, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja")
 
     def build(self):
@@ -90,8 +87,8 @@ class DXCConan(ConanFile):
             self.package_copy("lib/libdxcompiler.so*", "lib")
             self.package_copy("bin/dxc*", "bin")
         elif self.settings.os == "Macos":
-            self.package_copy("lib/libdxcompiler.dylib*", "lib")
-            self.package_copy("bin/dxc*", "bin")
+            self.package_copy("lib/libdxcompiler.dylib", "lib")
+            self.package_copy("bin/dxc", "bin")
         else:
             raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
 
