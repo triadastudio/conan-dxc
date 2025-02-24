@@ -48,7 +48,7 @@ class DXCConan(ConanFile):
         self.run("cmake --build %s --target \"dxc\" --config Release" % self.build_folder )
 
     def build_linux(self):
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-13 -DCMAKE_CXX_COMPILER=clang++-13 -C %s" %
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -C %s" %
                  (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja -j 4")
 
