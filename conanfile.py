@@ -87,8 +87,8 @@ class DXCConan(ConanFile):
             self.package_copy("lib/libdxcompiler.so*", "lib")
             self.package_copy("bin/dxc*", "bin")
         elif self.settings.os == "Macos":
-            self.package_copy("lib/libdxcompiler.dylib", "lib")
-            self.package_copy("bin/dxc", "bin")
+            self.package_copy("lib/libdxcompiler.dylib*", "lib")
+            self.package_copy("bin/dxc*", "bin")
         else:
             raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
 
