@@ -44,6 +44,7 @@ jobs:
         conan upload "dxc" -r triada -c
 
   linux:
+    if: false # disable
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -72,7 +73,6 @@ jobs:
         conan upload "dxc" -r triada -c
 
   macos:
-    if: false # disable
     runs-on: macos-14
     steps:
     - uses: actions/checkout@v4
@@ -101,7 +101,6 @@ jobs:
         conan upload "dxc" -r triada -c
 
   macos-armv8:
-    if: false # disable
     runs-on: macos-14
     steps:
     - uses: actions/checkout@v4
