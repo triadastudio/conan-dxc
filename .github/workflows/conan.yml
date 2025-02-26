@@ -71,7 +71,7 @@ jobs:
         conan upload "dxc" -r triada -c
 
   macos:
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
     - uses: actions/checkout@v4
       with:

@@ -7,7 +7,7 @@ import os
 
 class DXCConan(ConanFile):
     name = "dxc"
-    version = "1.8.2405"
+    version = "1.8.2502"
     description = "DirectX Shader Compiler"
     license = "NCSA"
     topics = ("hlsl", "dxc", "compiler", "shader", "spirv")
@@ -18,7 +18,7 @@ class DXCConan(ConanFile):
 
     @property
     def _source_commit_or_tag(self):
-        return "v1.8.2405"
+        return "v1.8.2502"
 
     @property
     def _source_subfolder(self):
@@ -48,13 +48,14 @@ class DXCConan(ConanFile):
         self.run("cmake --build %s --target \"dxc\" --config Release" % self.build_folder )
 
     def build_linux(self):
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-13 -DCMAKE_CXX_COMPILER=clang++-13 -C %s" %
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -C %s" %
                  (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja -j 4")
 
     def build_macos(self):
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -C %s" %
-                 (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
+        target_osx_arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_OSX_ARCHITECTURES=%s -C %s" %
+                (self.build_folder, self._build_type, target_osx_arch, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja")
 
     def build(self):
