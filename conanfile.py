@@ -43,7 +43,7 @@ class DXCConan(ConanFile):
         return os.path.join(self._source_dir, "cmake/caches/PredefinedParams.cmake")
 
     def build_windows(self):
-        self.run("cmake . -B%s -GNinja -Wno-dev -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_FLAGS=-w -DCMAKE_CXX_FLAGS=-w -C %s" %
+        self.run('cmake . -B%s -GNinja -Wno-dev -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_FLAGS=-w -DCMAKE_CXX_FLAGS=-w -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -C %s' %
                  (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
         self.run("ninja -C %s dxc" % self.build_folder)
 
