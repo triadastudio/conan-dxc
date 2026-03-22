@@ -34,7 +34,7 @@ jobs:
         ./.venv/Scripts/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
-    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: ilammy/msvc-dev-cmd@v1 # Adds Windows SDK tools (mc.exe) to PATH, required by DXC build
       with:
         arch: x64
     - name: Build
