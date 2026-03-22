@@ -34,6 +34,11 @@ jobs:
         ./.venv/Scripts/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
+    - name: Add Windows SDK to PATH
+      shell: pwsh
+      run: |
+        $sdkBin = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64" | Sort-Object Name -Descending | Select-Object -First 1
+        echo "$($sdkBin.FullName)" >> $env:GITHUB_PATH
     - name: Build
       run: |
         ./.venv/Scripts/activate
