@@ -26,6 +26,7 @@ jobs:
         python3 -m venv .venv
         ./.venv/Scripts/activate
         python3 -m pip install conan
+        python3 -m pip install ninja
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}

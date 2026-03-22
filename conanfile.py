@@ -7,7 +7,7 @@ import os
 
 class DXCConan(ConanFile):
     name = "dxc"
-    version = "1.8.2502"
+    version = "1.9.2602"
     description = "DirectX Shader Compiler"
     license = "NCSA"
     topics = ("hlsl", "dxc", "compiler", "shader", "spirv")
@@ -18,7 +18,7 @@ class DXCConan(ConanFile):
 
     @property
     def _source_commit_or_tag(self):
-        return "v1.8.2502"
+        return "v1.9.2602"
 
     @property
     def _source_subfolder(self):
@@ -43,9 +43,9 @@ class DXCConan(ConanFile):
         return os.path.join(self._source_dir, "cmake/caches/PredefinedParams.cmake")
 
     def build_windows(self):
-        self.run("cmake . -B%s -A x64 -DCMAKE_BUILD_TYPE=%s -C %s" %
+        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -C %s" %
                  (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
-        self.run("cmake --build %s --target \"dxc\" --config Release" % self.build_folder )
+        self.run("ninja -C %s dxc" % self.build_folder)
 
     def build_linux(self):
         self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -C %s" %
@@ -80,9 +80,9 @@ class DXCConan(ConanFile):
             self._source_dir, "include", "dxc"), keep_path=True)
 
         if self.settings.os == "Windows":
-            self.package_copy("Release/lib/dxcompiler.lib", "lib")
-            self.package_copy("Release/bin/dxcompiler.dll", "bin")
-            self.package_copy("Release/bin/dxc.exe", "bin")
+            self.package_copy("lib/dxcompiler.lib", "lib")
+            self.package_copy("bin/dxcompiler.dll", "bin")
+            self.package_copy("bin/dxc.exe", "bin")
         elif self.settings.os == "Linux":
             self.package_copy("lib/libdxcompiler.so*", "lib")
             self.package_copy("bin/dxc*", "bin")
