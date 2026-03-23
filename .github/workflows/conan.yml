@@ -26,6 +26,7 @@ jobs:
         python3 -m venv .venv
         ./.venv/Scripts/activate
         python3 -m pip install conan
+        python3 -m pip install ninja
     - name: Config
       env:
         CONAN_PASSWORD: ${{ secrets.ARTIFACTORY_APIKEY }}
@@ -33,6 +34,9 @@ jobs:
         ./.venv/Scripts/activate
         conan remote add triada ${{ secrets.ARTIFACTORY_URL }}
         conan remote login triada ${{ secrets.ARTIFACTORY_USER }}
+    - uses: ilammy/msvc-dev-cmd@v1 # Adds Windows SDK tools (mc.exe) to PATH, required by DXC build
+      with:
+        arch: x64
     - name: Build
       run: |
         ./.venv/Scripts/activate
