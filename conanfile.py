@@ -1,8 +1,12 @@
 from conan import ConanFile
-from conan.tools import files, scm
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy
+from conan.tools.scm import Git
 
 import os
+
+required_conan_version = ">=2.0.9"
 
 
 class DXCConan(ConanFile):
@@ -13,85 +17,68 @@ class DXCConan(ConanFile):
     topics = ("hlsl", "dxc", "compiler", "shader", "spirv")
     homepage = "https://github.com/microsoft/DirectXShaderCompiler"
     url = "https://github.com/triadastudio/conan-dxc"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_commit_or_tag(self):
-        return "v1.9.2602"
+    def layout(self):
+        cmake_layout(self, generator="Ninja", src_folder="src")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.27 <4]")
+        self.tool_requires("ninja/[>=1.11 <2]")
 
-    @property
-    def _build_type(self):
-        return "Release"
+    def validate(self):
+        if str(self.settings.os) not in ("Windows", "Linux", "Macos"):
+            raise ConanInvalidConfiguration(f"Unsupported OS: {self.settings.os}")
 
-    @property
-    def _source_dir(self):
-        return os.path.join(self.source_folder, self._source_subfolder)
+    def package_id(self):
+        # dxcompiler exposes COM-style vtable interfaces with no std:: types crossing the ABI,
+        # so C++ standard doesn't matter to consumers
+        self.info.settings.rm_safe("compiler.cppstd")
 
     def source(self):
-        self.run(f"git clone https://github.com/microsoft/DirectXShaderCompiler.git {self._source_subfolder}")
-        with files.chdir(self, self._source_subfolder):
-            self.run(f"git checkout {self._source_commit_or_tag}")
-            self.run("git submodule update --init --recursive")
+        git = Git(self)
+        git.clone(url="https://github.com/microsoft/DirectXShaderCompiler.git",
+                  target=".",
+                  args=["--depth", "1", "--branch", f"v{self.version}",
+                        "--recurse-submodules", "--shallow-submodules"])
 
-    @property
-    def _predefined_cmake_params_path(self):
-        return os.path.join(self._source_dir, "cmake/caches/PredefinedParams.cmake")
-
-    def build_windows(self):
-        self.run('cmake . -B%s -GNinja -Wno-dev -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-cl -DCMAKE_CXX_COMPILER=clang-cl -DCMAKE_C_FLAGS=-w -DCMAKE_CXX_FLAGS=-w -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON -C %s' %
-                 (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
-        self.run("ninja -C %s dxc" % self.build_folder)
-
-    def build_linux(self):
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16 -C %s" %
-                 (self.build_folder, self._build_type, self._predefined_cmake_params_path), cwd=self._source_dir)
-        self.run("ninja -j 4")
-
-    def build_macos(self):
-        target_osx_arch = "x86_64" if self.settings.arch == "x86_64" else "arm64"
-        self.run("cmake . -B%s -GNinja -DCMAKE_BUILD_TYPE=%s -DCMAKE_OSX_ARCHITECTURES=%s -C %s" %
-                (self.build_folder, self._build_type, target_osx_arch, self._predefined_cmake_params_path), cwd=self._source_dir)
-        self.run("ninja")
+    def generate(self):
+        tc = CMakeToolchain(self, generator="Ninja")
+        if self.settings.os == "Windows":
+            # LLVM-3.7-era code is extremely warning-noisy under clang-cl
+            tc.extra_cflags.append("-w")
+            tc.extra_cxxflags.append("-w")
+            tc.cache_variables["CMAKE_INTERPROCEDURAL_OPTIMIZATION"] = True
+        tc.generate()
 
     def build(self):
-        if self.settings.os == "Windows":
-            self.build_windows()
-        elif self.settings.os == "Linux":
-            self.build_linux()
-        elif self.settings.os == "Macos":
-            self.build_macos()
-        else:
-            raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
-
-    def package_copy(self, pattern, dst_dir, keep_path=False, src_path = None):
-        if src_path is None:
-           src_path = self.build_folder
-
-        dst = os.path.join(self.package_folder, dst_dir)
-        files.copy(self, pattern, src=src_path, dst=dst, keep_path=keep_path)
+        cmake = CMake(self)
+        predefined_params = os.path.join(self.source_folder, "cmake", "caches", "PredefinedParams.cmake")
+        cmake.configure(cli_args=["-Wno-dev", f'-C "{predefined_params}"'])
+        # dxc depends on dxcompiler, so this single target builds everything package() needs
+        cmake.build(target="dxc")
 
     def package(self):
-        self.package_copy("*.h", "include", src_path=os.path.join(
-            self._source_dir, "include", "dxc"), keep_path=True)
+        copy(self, "LICENSE.TXT", src=self.source_folder,
+             dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h",
+             src=os.path.join(self.source_folder, "include", "dxc"),
+             dst=os.path.join(self.package_folder, "include"), keep_path=True)
 
+        lib_dst = os.path.join(self.package_folder, "lib")
+        bin_dst = os.path.join(self.package_folder, "bin")
         if self.settings.os == "Windows":
-            self.package_copy("lib/dxcompiler.lib", "lib")
-            self.package_copy("bin/dxcompiler.dll", "bin")
-            self.package_copy("bin/dxc.exe", "bin")
+            copy(self, "lib/dxcompiler.lib", src=self.build_folder, dst=lib_dst, keep_path=False)
+            copy(self, "bin/dxcompiler.dll", src=self.build_folder, dst=bin_dst, keep_path=False)
+            copy(self, "bin/dxc.exe", src=self.build_folder, dst=bin_dst, keep_path=False)
         elif self.settings.os == "Linux":
-            self.package_copy("lib/libdxcompiler.so*", "lib")
-            self.package_copy("bin/dxc*", "bin")
-        elif self.settings.os == "Macos":
-            self.package_copy("lib/libdxcompiler.dylib*", "lib")
-            self.package_copy("bin/dxc*", "bin")
-        else:
-            raise ConanInvalidConfiguration("Unsupported OS: %s" % self.settings.os)
+            copy(self, "lib/libdxcompiler.so*", src=self.build_folder, dst=lib_dst, keep_path=False)
+            copy(self, "bin/dxc*", src=self.build_folder, dst=bin_dst, keep_path=False)
+        else:  # Macos, guaranteed by validate()
+            copy(self, "lib/libdxcompiler.dylib*", src=self.build_folder, dst=lib_dst, keep_path=False)
+            copy(self, "bin/dxc*", src=self.build_folder, dst=bin_dst, keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["dxcompiler"]
-        self.cpp_info.includedirs = ["include"]
