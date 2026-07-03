@@ -34,8 +34,9 @@ class DXCConan(ConanFile):
 
     def package_id(self):
         # dxcompiler exposes COM-style vtable interfaces with no std:: types crossing the ABI,
-        # so C++ standard doesn't matter to consumers
-        self.info.settings.rm_safe("compiler.cppstd")
+        # so the same Release binary serves any consumer compiler and build_type
+        del self.info.settings.compiler
+        del self.info.settings.build_type
 
     def source(self):
         git = Git(self)

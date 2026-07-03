@@ -5,6 +5,7 @@ build_type=Release
 compiler=clang
 compiler.version=17
 compiler.runtime=dynamic
+compiler.runtime_version=v144
 compiler.cppstd=17
 
 [conf]
